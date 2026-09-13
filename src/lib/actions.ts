@@ -68,6 +68,39 @@ export async function createLead(eventId: string, input: LeadInput) {
   return { success: true };
 }
 
+export type LeadEditInput = {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+  note?: string;
+};
+
+export async function updateLead(
+  eventId: string,
+  leadId: string,
+  input: LeadEditInput,
+) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("epack_leads")
+    .update({
+      first_name: input.first_name || null,
+      last_name: input.last_name || null,
+      email: input.email || null,
+      phone: input.phone || null,
+      company: input.company || null,
+      note: input.note || null,
+    })
+    .eq("id", leadId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/events/${eventId}`);
+  return { success: true };
+}
+
 export async function deleteLead(eventId: string, leadId: string) {
   const supabase = await createClient();
   const { error } = await supabase
