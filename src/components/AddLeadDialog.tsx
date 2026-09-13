@@ -94,7 +94,7 @@ export default function AddLeadDialog({ eventId }: { eventId: string }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-xl bg-black text-white py-3 font-medium"
+        className="w-full rounded-xl bg-brand-lime text-brand-ink py-3 font-semibold hover:bg-brand-lime-hover transition"
       >
         + Añadir lead
       </button>
@@ -107,7 +107,7 @@ export default function AddLeadDialog({ eventId }: { eventId: string }) {
                 <h2 className="font-semibold text-lg">Nuevo lead</h2>
                 <button
                   onClick={closeDialog}
-                  className="text-gray-400 hover:text-black text-xl leading-none"
+                  className="text-gray-400 hover:text-brand-dark text-xl leading-none"
                   aria-label="Cerrar"
                 >
                   ×
@@ -146,7 +146,7 @@ export default function AddLeadDialog({ eventId }: { eventId: string }) {
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={scanning}
-                    className="w-full rounded-lg border-2 border-dashed border-gray-300 py-6 text-sm text-gray-500 hover:border-black disabled:opacity-50"
+                    className="w-full rounded-lg border-2 border-dashed border-gray-300 py-6 text-sm text-gray-500 hover:border-brand-dark disabled:opacity-50"
                   >
                     {scanning
                       ? "Leyendo tarjeta..."
@@ -201,7 +201,7 @@ export default function AddLeadDialog({ eventId }: { eventId: string }) {
                       setForm({ ...form, note: e.target.value })
                     }
                     rows={2}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark"
                   />
                 </div>
               </div>
@@ -216,7 +216,7 @@ export default function AddLeadDialog({ eventId }: { eventId: string }) {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="w-full rounded-xl bg-black text-white py-3 font-medium disabled:opacity-50"
+                className="w-full rounded-xl bg-brand-lime text-brand-ink py-3 font-semibold hover:bg-brand-lime-hover transition disabled:opacity-50"
               >
                 {saving ? "Guardando..." : "Guardar lead"}
               </button>
@@ -248,7 +248,7 @@ function Field({
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark"
       />
     </div>
   );

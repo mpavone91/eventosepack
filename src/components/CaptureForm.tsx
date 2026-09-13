@@ -98,7 +98,7 @@ export default function CaptureForm({ eventId }: { eventId: string }) {
       <button
         type="submit"
         disabled={saving}
-        className="w-full rounded-xl bg-black text-white py-3 font-medium disabled:opacity-50"
+        className="w-full rounded-xl bg-brand-lime text-brand-ink py-3 font-semibold hover:bg-brand-lime-hover transition disabled:opacity-50"
       >
         {saving ? "Enviando..." : "Enviar mis datos"}
       </button>
@@ -126,7 +126,7 @@ function Field({
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark"
       />
     </div>
   );

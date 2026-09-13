@@ -56,7 +56,7 @@ export default async function EventPage({
         </Link>
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold">{event.name}</h1>
-          <span className="text-lg font-semibold rounded-full bg-black text-white px-3 py-1">
+          <span className="text-lg font-semibold rounded-full bg-brand-lime text-brand-ink px-3 py-1">
             {leads?.length ?? 0}
           </span>
         </div>

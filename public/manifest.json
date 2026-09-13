@@ -1,11 +1,11 @@
 {
-  "name": "EventoSePack - Captación de leads",
-  "short_name": "EventoSePack",
+  "name": "Lead Capturer - Captación de leads",
+  "short_name": "Lead Capturer",
   "description": "Captura leads en ferias y eventos: escanea tarjetas, genera QR y organiza por evento.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#111111",
+  "theme_color": "#3b4a44",
   "icons": [
     {
       "src": "/icons/icon-192.png",

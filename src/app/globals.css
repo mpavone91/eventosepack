@@ -3,11 +3,21 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --brand-dark: #3b4a44;
+  --brand-dark-hover: #2e3b36;
+  --brand-lime: #a8e05a;
+  --brand-lime-hover: #93c94e;
+  --brand-ink: #1f2a22;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-dark-hover: var(--brand-dark-hover);
+  --color-brand-lime: var(--brand-lime);
+  --color-brand-lime-hover: var(--brand-lime-hover);
+  --color-brand-ink: var(--brand-ink);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

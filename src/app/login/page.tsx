@@ -31,16 +31,21 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex flex-1 items-center justify-center px-4 py-12">
+    <main className="flex flex-1 items-center justify-center px-4 py-12 bg-brand-dark">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-1">
-          <h1 className="text-2xl font-semibold">EventoSePack</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-semibold text-white">
+            Lead <span className="text-brand-lime">Capturer</span>
+          </h1>
+          <p className="text-sm text-white/70">
             Captación de leads para ferias y eventos
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 bg-white rounded-2xl p-6"
+        >
           <div>
             <label className="block text-sm font-medium mb-1" htmlFor="email">
               Email
@@ -51,7 +56,7 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-dark"
             />
           </div>
           <div>
@@ -65,7 +70,7 @@ export default function LoginPage() {
               required
               value={pin}
               onChange={(e) => setPin(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 tracking-widest focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 tracking-widest focus:outline-none focus:ring-2 focus:ring-brand-dark"
             />
           </div>
 
@@ -74,13 +79,13 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-black text-white py-2.5 font-medium disabled:opacity-50"
+            className="w-full rounded-lg bg-brand-lime text-brand-ink py-2.5 font-semibold hover:bg-brand-lime-hover transition disabled:opacity-50"
           >
             {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-400">
+        <p className="text-center text-xs text-white/60">
           ¿No tienes acceso? Pídele a tu manager que te dé de alta.
         </p>
       </div>

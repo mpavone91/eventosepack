@@ -47,7 +47,13 @@ export default async function TeamPage() {
                 <p className="font-medium">{m.name || m.email}</p>
                 <p className="text-xs text-gray-500">{m.email}</p>
               </div>
-              <span className="text-xs font-medium rounded-full bg-gray-100 px-2.5 py-1">
+              <span
+                className={`text-xs font-medium rounded-full px-2.5 py-1 ${
+                  m.role === "manager"
+                    ? "bg-brand-dark text-white"
+                    : "bg-brand-lime text-brand-ink"
+                }`}
+              >
                 {m.role === "manager" ? "Manager" : "Comercial"}
               </span>
             </div>
@@ -64,14 +70,14 @@ export default async function TeamPage() {
             name="name"
             required
             placeholder="Nombre"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark"
           />
           <input
             name="email"
             type="email"
             required
             placeholder="Email"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark"
           />
           <input
             name="pin"
@@ -79,9 +85,9 @@ export default async function TeamPage() {
             inputMode="numeric"
             pattern="\d{4,6}"
             placeholder="PIN (4-6 dígitos)"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm tracking-widest focus:outline-none focus:ring-2 focus:ring-black"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm tracking-widest focus:outline-none focus:ring-2 focus:ring-brand-dark"
           />
-          <button className="w-full rounded-lg bg-black text-white py-2.5 text-sm font-medium">
+          <button className="w-full rounded-lg bg-brand-lime text-brand-ink py-2.5 text-sm font-semibold hover:bg-brand-lime-hover transition">
             Crear acceso
           </button>
         </form>

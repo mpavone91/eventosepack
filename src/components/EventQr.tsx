@@ -11,7 +11,7 @@ export default function EventQr({ url }: { url: string }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-xl border border-gray-300 py-3 font-medium"
+        className="w-full rounded-xl border-2 border-brand-dark text-brand-dark py-3 font-semibold hover:bg-brand-dark hover:text-white transition"
       >
         Mostrar QR para que rellenen sus datos
       </button>
@@ -37,7 +37,7 @@ export default function EventQr({ url }: { url: string }) {
               </button>
               <button
                 onClick={() => setOpen(false)}
-                className="flex-1 rounded-lg bg-black text-white py-2 text-sm"
+                className="flex-1 rounded-lg bg-brand-dark text-white py-2 text-sm hover:bg-brand-dark-hover transition"
               >
                 Cerrar
               </button>

@@ -1,4 +1,4 @@
-# EventoSePack
+# Lead Capturer
 
 App para captar leads en ferias y eventos: alta manual, escaneo de tarjetas de
 visita (OCR) y un QR de autorregistro por evento. Pensada como PWA instalable

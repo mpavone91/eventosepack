@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EventoSePack",
+  title: "Lead Capturer",
   description:
     "Captación de leads en ferias y eventos: escanea tarjetas, genera QR y organiza por evento.",
   manifest: "/manifest.json",
@@ -25,14 +25,14 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "EventoSePack",
+    title: "Lead Capturer",
   },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#111111",
+  themeColor: "#3b4a44",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

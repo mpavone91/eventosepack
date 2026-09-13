@@ -29,22 +29,24 @@ export default async function DashboardPage() {
 
   return (
     <main className="flex-1 mx-auto w-full max-w-lg px-4 py-6 space-y-6">
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-between bg-brand-dark rounded-2xl px-4 py-3">
         <div>
-          <h1 className="text-xl font-semibold">EventoSePack</h1>
-          <p className="text-xs text-gray-500">{user?.email}</p>
+          <h1 className="text-lg font-semibold text-white">
+            Lead <span className="text-brand-lime">Capturer</span>
+          </h1>
+          <p className="text-xs text-white/60">{user?.email}</p>
         </div>
         <div className="flex items-center gap-3">
           {isManager && (
             <Link
               href="/team"
-              className="text-sm text-gray-500 hover:text-black"
+              className="text-sm text-white/80 hover:text-brand-lime"
             >
               Equipo
             </Link>
           )}
           <form action={signOut}>
-            <button className="text-sm text-gray-500 hover:text-black">
+            <button className="text-sm text-white/80 hover:text-brand-lime">
               Salir
             </button>
           </form>
@@ -64,7 +66,7 @@ export default async function DashboardPage() {
                 <Link
                   key={event.id}
                   href={`/events/${event.id}`}
-                  className="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 hover:border-black transition"
+                  className="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 hover:border-brand-dark transition"
                 >
                   <div>
                     <p className="font-medium">{event.name}</p>
@@ -73,7 +75,7 @@ export default async function DashboardPage() {
                       {creatorName ? ` · creado por ${creatorName}` : ""}
                     </p>
                   </div>
-                  <span className="text-sm font-semibold rounded-full bg-black text-white px-2.5 py-1 min-w-8 text-center">
+                  <span className="text-sm font-semibold rounded-full bg-brand-lime text-brand-ink px-2.5 py-1 min-w-8 text-center">
                     {count}
                   </span>
                 </Link>
@@ -96,9 +98,9 @@ export default async function DashboardPage() {
             name="name"
             required
             placeholder="Ej. Feria Madrid 2026"
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark"
           />
-          <button className="rounded-lg bg-black text-white px-4 py-2 text-sm font-medium">
+          <button className="rounded-lg bg-brand-lime text-brand-ink px-4 py-2 text-sm font-semibold hover:bg-brand-lime-hover transition">
             Crear
           </button>
         </form>
