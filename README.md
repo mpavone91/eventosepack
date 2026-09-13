@@ -6,9 +6,13 @@ desde el navegador, desplegada en Vercel.
 
 ## Funcionalidades
 
-- Login simple (email + contraseña, Supabase Auth).
-- Eventos como "carpetas": cada feria es un evento independiente con su
-  contador de leads.
+- Login por email + PIN (Supabase Auth). No hay registro público: solo un
+  manager puede dar de alta cuentas nuevas desde la pantalla "Equipo".
+- Roles: un `manager` ve todos los eventos y leads del equipo; un `rep`
+  (comercial) ve y gestiona todo lo compartido pero solo puede editar/borrar
+  lo que él mismo creó.
+- Eventos como "carpetas" compartidas por todo el equipo: cada feria es un
+  evento con su contador de leads, visible para todos los que tengan cuenta.
 - Alta manual de lead: nombre, apellidos, email, teléfono, empresa, nota.
 - Escaneo de tarjeta: cámara o galería → extracción con IA (Claude, visión) →
   formulario pre-rellenado y editable antes de guardar.
@@ -25,6 +29,10 @@ desde el navegador, desplegada en Vercel.
      Supabase (tablas `epack_events` y `epack_leads`, con RLS ya configurado).
    - `ANTHROPIC_API_KEY`: clave de la [consola de Anthropic](https://console.anthropic.com/)
      usada para extraer los datos de la tarjeta con visión (modelo Claude Haiku).
+   - `SUPABASE_SERVICE_ROLE_KEY`: clave secreta de Supabase (Project Settings →
+     API → service_role). Solo se usa en el servidor, nunca llega al cliente —
+     la necesita la pantalla "Equipo" para crear cuentas de compañeros sin
+     cerrar la sesión del manager.
 2. `npm install`
 3. `npm run dev`
 

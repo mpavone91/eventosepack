@@ -7,43 +7,27 @@ import { createClient } from "@/lib/supabase/client";
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
-  const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setMessage(null);
     setLoading(true);
 
-    if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      setLoading(false);
-      if (error) {
-        setError(error.message);
-        return;
-      }
-      router.push("/");
-      router.refresh();
-    } else {
-      const { error } = await supabase.auth.signUp({ email, password });
-      setLoading(false);
-      if (error) {
-        setError(error.message);
-        return;
-      }
-      setMessage(
-        "Cuenta creada. Si tu proyecto pide confirmación por email, revisa tu correo antes de entrar.",
-      );
-      setMode("login");
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password: pin,
+    });
+    setLoading(false);
+    if (error) {
+      setError("Email o PIN incorrecto");
+      return;
     }
+    router.push("/");
+    router.refresh();
   }
 
   return (
@@ -71,51 +55,34 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label
-              className="block text-sm font-medium mb-1"
-              htmlFor="password"
-            >
-              Contraseña
+            <label className="block text-sm font-medium mb-1" htmlFor="pin">
+              PIN
             </label>
             <input
-              id="password"
+              id="pin"
               type="password"
+              inputMode="numeric"
               required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 tracking-widest focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
-          {message && <p className="text-sm text-green-600">{message}</p>}
 
           <button
             type="submit"
             disabled={loading}
             className="w-full rounded-lg bg-black text-white py-2.5 font-medium disabled:opacity-50"
           >
-            {loading
-              ? "Cargando..."
-              : mode === "login"
-                ? "Entrar"
-                : "Crear cuenta"}
+            {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>
 
-        <button
-          onClick={() => {
-            setMode(mode === "login" ? "signup" : "login");
-            setError(null);
-            setMessage(null);
-          }}
-          className="w-full text-sm text-gray-500 hover:text-black text-center"
-        >
-          {mode === "login"
-            ? "¿Primera vez? Crear una cuenta"
-            : "¿Ya tienes cuenta? Entrar"}
-        </button>
+        <p className="text-center text-xs text-gray-400">
+          ¿No tienes acceso? Pídele a tu manager que te dé de alta.
+        </p>
       </div>
     </main>
   );

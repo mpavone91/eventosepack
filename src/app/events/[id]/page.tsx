@@ -22,13 +22,26 @@ export default async function EventPage({
 
   if (!event) notFound();
 
-  const { data: leads } = await supabase
-    .from("epack_leads")
-    .select(
-      "id, first_name, last_name, email, phone, company, note, capture_method, created_at",
-    )
-    .eq("event_id", id)
-    .order("created_at", { ascending: false });
+  const [{ data: leads }, { data: profiles }] = await Promise.all([
+    supabase
+      .from("epack_leads")
+      .select(
+        "id, first_name, last_name, email, phone, company, note, capture_method, created_at, created_by",
+      )
+      .eq("event_id", id)
+      .order("created_at", { ascending: false }),
+    supabase.from("epack_profiles").select("user_id, name"),
+  ]);
+
+  const nameByUserId = new Map(
+    (profiles ?? []).map((p) => [p.user_id, p.name]),
+  );
+  const leadsWithCapturer = (leads ?? []).map((lead) => ({
+    ...lead,
+    captured_by_name: lead.created_by
+      ? (nameByUserId.get(lead.created_by) ?? null)
+      : null,
+  }));
 
   const headerList = await headers();
   const host = headerList.get("host");
@@ -57,7 +70,7 @@ export default async function EventPage({
 
       <section>
         <h2 className="text-sm font-medium text-gray-500 mb-2">Leads</h2>
-        <LeadList eventId={event.id} leads={leads ?? []} />
+        <LeadList eventId={event.id} leads={leadsWithCapturer} />
       </section>
     </main>
   );

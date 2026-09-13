@@ -8,10 +8,24 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: events } = await supabase
-    .from("epack_events")
-    .select("id, name, created_at, epack_leads(count)")
-    .order("created_at", { ascending: false });
+  const [{ data: events }, { data: profiles }, { data: myProfile }] =
+    await Promise.all([
+      supabase
+        .from("epack_events")
+        .select("id, name, created_at, user_id, epack_leads(count)")
+        .order("created_at", { ascending: false }),
+      supabase.from("epack_profiles").select("user_id, name"),
+      supabase
+        .from("epack_profiles")
+        .select("role")
+        .eq("user_id", user?.id ?? "")
+        .single(),
+    ]);
+
+  const isManager = myProfile?.role === "manager";
+  const nameByUserId = new Map(
+    (profiles ?? []).map((p) => [p.user_id, p.name]),
+  );
 
   return (
     <main className="flex-1 mx-auto w-full max-w-lg px-4 py-6 space-y-6">
@@ -20,23 +34,32 @@ export default async function DashboardPage() {
           <h1 className="text-xl font-semibold">EventoSePack</h1>
           <p className="text-xs text-gray-500">{user?.email}</p>
         </div>
-        <form action={signOut}>
-          <button className="text-sm text-gray-500 hover:text-black">
-            Salir
-          </button>
-        </form>
+        <div className="flex items-center gap-3">
+          {isManager && (
+            <Link
+              href="/team"
+              className="text-sm text-gray-500 hover:text-black"
+            >
+              Equipo
+            </Link>
+          )}
+          <form action={signOut}>
+            <button className="text-sm text-gray-500 hover:text-black">
+              Salir
+            </button>
+          </form>
+        </div>
       </header>
 
       <section>
-        <h2 className="text-sm font-medium text-gray-500 mb-2">
-          Tus eventos
-        </h2>
+        <h2 className="text-sm font-medium text-gray-500 mb-2">Eventos</h2>
         <div className="space-y-2">
           {events?.length ? (
             events.map((event) => {
               const count = Array.isArray(event.epack_leads)
                 ? (event.epack_leads[0]?.count ?? 0)
                 : 0;
+              const creatorName = nameByUserId.get(event.user_id);
               return (
                 <Link
                   key={event.id}
@@ -47,6 +70,7 @@ export default async function DashboardPage() {
                     <p className="font-medium">{event.name}</p>
                     <p className="text-xs text-gray-500">
                       {new Date(event.created_at).toLocaleDateString("es-ES")}
+                      {creatorName ? ` · creado por ${creatorName}` : ""}
                     </p>
                   </div>
                   <span className="text-sm font-semibold rounded-full bg-black text-white px-2.5 py-1 min-w-8 text-center">
@@ -57,7 +81,7 @@ export default async function DashboardPage() {
             })
           ) : (
             <p className="text-sm text-gray-500 py-6 text-center">
-              Aún no tienes eventos. Crea el primero abajo.
+              Aún no hay eventos. Crea el primero abajo.
             </p>
           )}
         </div>

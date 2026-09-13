@@ -13,6 +13,7 @@ export type Lead = {
   note: string | null;
   capture_method: string;
   created_at: string;
+  captured_by_name?: string | null;
 };
 
 const METHOD_LABEL: Record<string, string> = {
@@ -79,6 +80,11 @@ export default function LeadList({
                 <span className="text-[10px] uppercase tracking-wide text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
                   {METHOD_LABEL[lead.capture_method] ?? lead.capture_method}
                 </span>
+                {lead.captured_by_name && (
+                  <span className="text-[10px] text-gray-400">
+                    {lead.captured_by_name}
+                  </span>
+                )}
                 <button
                   disabled={isPending}
                   onClick={() =>

@@ -59,6 +59,7 @@ export async function createLead(eventId: string, input: LeadInput) {
     note: input.note || null,
     capture_method: input.capture_method,
     consent: true,
+    created_by: user.id,
   });
 
   if (error) return { error: error.message };
@@ -125,4 +126,57 @@ export async function deleteEvent(eventId: string) {
 
   revalidatePath("/");
   redirect("/");
+}
+
+async function requireManager() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: profile } = await supabase
+    .from("epack_profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+
+  if (profile?.role !== "manager") {
+    throw new Error("Solo un manager puede hacer esto");
+  }
+}
+
+export async function createTeamMember(formData: FormData) {
+  await requireManager();
+
+  const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
+  const pin = String(formData.get("pin") ?? "").trim();
+
+  if (!name || !email || !/^\d{4,6}$/.test(pin)) {
+    throw new Error("Nombre, email y un PIN de 4 a 6 dígitos son obligatorios");
+  }
+
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  const admin = createAdminClient();
+
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password: pin,
+    email_confirm: true,
+  });
+
+  if (error) throw new Error(error.message);
+
+  const supabase = await createClient();
+  const { error: profileError } = await supabase
+    .from("epack_profiles")
+    .update({ name })
+    .eq("user_id", data.user.id);
+
+  if (profileError) throw new Error(profileError.message);
+
+  revalidatePath("/team");
 }
