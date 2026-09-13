@@ -10,8 +10,8 @@ desde el navegador, desplegada en Vercel.
 - Eventos como "carpetas": cada feria es un evento independiente con su
   contador de leads.
 - Alta manual de lead: nombre, apellidos, email, teléfono, empresa, nota.
-- Escaneo de tarjeta: cámara o galería → OCR (OCR.space) → formulario
-  pre-rellenado y editable antes de guardar.
+- Escaneo de tarjeta: cámara o galería → extracción con IA (Claude, visión) →
+  formulario pre-rellenado y editable antes de guardar.
 - QR de autorregistro por evento: la otra persona escanea y rellena sus
   propios datos desde su móvil, sin necesitar la app.
 - Aviso legal / política de privacidad y checkbox de consentimiento en el
@@ -23,8 +23,8 @@ desde el navegador, desplegada en Vercel.
 1. Copia `.env.local.example` a `.env.local` y rellena:
    - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`: del proyecto
      Supabase (tablas `epack_events` y `epack_leads`, con RLS ya configurado).
-   - `OCR_SPACE_API_KEY`: clave gratuita de [ocr.space](https://ocr.space/ocrapi)
-     (regístrate con un email, la key llega al momento).
+   - `ANTHROPIC_API_KEY`: clave de la [consola de Anthropic](https://console.anthropic.com/)
+     usada para extraer los datos de la tarjeta con visión (modelo Claude Haiku).
 2. `npm install`
 3. `npm run dev`
 
