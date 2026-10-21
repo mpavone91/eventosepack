@@ -203,13 +203,20 @@ export async function createTeamMember(formData: FormData) {
 
   if (error) throw new Error(error.message);
 
-  const supabase = await createClient();
-  const { error: profileError } = await supabase
+  // El perfil lo crea la app (ya no hay trigger en auth.users: ese proyecto Supabase
+  // lo comparte QuantiChef y el trigger daba perfil de equipo a cualquier registro).
+  // upsert para que funcione igual con o sin el trigger antiguo.
+  const { error: profileError } = await admin
     .from("epack_profiles")
-    .update({ name })
-    .eq("user_id", data.user.id);
+    .upsert(
+      { user_id: data.user.id, email, name, role: "rep" },
+      { onConflict: "user_id" },
+    );
 
-  if (profileError) throw new Error(profileError.message);
+  if (profileError) {
+    await admin.auth.admin.deleteUser(data.user.id);
+    throw new Error(profileError.message);
+  }
 
   revalidatePath("/team");
 }
