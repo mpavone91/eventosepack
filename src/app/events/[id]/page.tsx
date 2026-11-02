@@ -84,7 +84,9 @@ export default async function EventPage({
         <EventQr url={captureUrl} />
       </div>
 
-      <EventReport eventId={event.id} leads={leadsWithCapturer} />
+      {isManager && (
+        <EventReport eventId={event.id} leads={leadsWithCapturer} />
+      )}
 
       {isManager && (
         <EventMembers

@@ -55,6 +55,15 @@ export async function GET(
   } = await supabase.auth.getUser();
   if (!user) return new Response("No autorizado", { status: 401 });
 
+  const { data: me } = await supabase
+    .from("epack_profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+  if (me?.role !== "manager") {
+    return new Response("Solo el manager puede exportar", { status: 403 });
+  }
+
   const { data: event } = await supabase
     .from("epack_events")
     .select("id, name")
