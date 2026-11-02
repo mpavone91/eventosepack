@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { createTeamMember } from "@/lib/actions";
+import TeamMemberForm from "@/components/TeamMemberForm";
 
 export default async function TeamPage() {
   const supabase = await createClient();
@@ -65,32 +65,7 @@ export default async function TeamPage() {
         <h2 className="text-sm font-medium text-gray-500 mb-3">
           Añadir compañero
         </h2>
-        <form action={createTeamMember} className="space-y-3">
-          <input
-            name="name"
-            required
-            placeholder="Nombre"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark"
-          />
-          <input
-            name="email"
-            type="email"
-            required
-            placeholder="Email"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark"
-          />
-          <input
-            name="pin"
-            required
-            inputMode="numeric"
-            pattern="\d{4,6}"
-            placeholder="PIN (4-6 dígitos)"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm tracking-widest focus:outline-none focus:ring-2 focus:ring-brand-dark"
-          />
-          <button className="w-full rounded-lg bg-brand-lime text-brand-ink py-2.5 text-sm font-semibold hover:bg-brand-lime-hover transition">
-            Crear acceso
-          </button>
-        </form>
+        <TeamMemberForm />
       </section>
     </main>
   );

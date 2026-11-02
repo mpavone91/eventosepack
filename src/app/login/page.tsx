@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { pinToPassword } from "@/lib/pin";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,10 +19,17 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    let { error } = await supabase.auth.signInWithPassword({
       email: currentEmail,
-      password: pin,
+      password: pinToPassword(pin),
     });
+    if (error) {
+      // Cuentas antiguas guardaron el PIN tal cual como contraseña.
+      ({ error } = await supabase.auth.signInWithPassword({
+        email: currentEmail,
+        password: pin,
+      }));
+    }
     setLoading(false);
     if (error) {
       setError("Email o PIN incorrecto");

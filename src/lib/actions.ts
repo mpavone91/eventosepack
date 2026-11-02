@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { pinToPassword } from "@/lib/pin";
 
 export async function signOut() {
   const supabase = await createClient();
@@ -179,7 +180,12 @@ async function requireManager() {
   }
 }
 
-export async function createTeamMember(formData: FormData) {
+export type TeamMemberState = { error?: string; success?: string } | null;
+
+export async function createTeamMember(
+  _prev: TeamMemberState,
+  formData: FormData,
+): Promise<TeamMemberState> {
   await requireManager();
 
   const name = String(formData.get("name") ?? "").trim();
@@ -188,8 +194,8 @@ export async function createTeamMember(formData: FormData) {
     .toLowerCase();
   const pin = String(formData.get("pin") ?? "").trim();
 
-  if (!name || !email || !/^\d{4,6}$/.test(pin)) {
-    throw new Error("Nombre, email y un PIN de 4 a 6 dígitos son obligatorios");
+  if (!name || !email || !/^\d{4}$/.test(pin)) {
+    return { error: "Nombre, email y un PIN de 4 dígitos son obligatorios" };
   }
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
@@ -197,11 +203,16 @@ export async function createTeamMember(formData: FormData) {
 
   const { data, error } = await admin.auth.admin.createUser({
     email,
-    password: pin,
+    password: pinToPassword(pin),
     email_confirm: true,
   });
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    const msg = /already.*registered|already exists/i.test(error.message)
+      ? "Ya existe una cuenta con ese email"
+      : error.message;
+    return { error: msg };
+  }
 
   // El perfil lo crea la app (ya no hay trigger en auth.users: ese proyecto Supabase
   // lo comparte QuantiChef y el trigger daba perfil de equipo a cualquier registro).
@@ -215,8 +226,9 @@ export async function createTeamMember(formData: FormData) {
 
   if (profileError) {
     await admin.auth.admin.deleteUser(data.user.id);
-    throw new Error(profileError.message);
+    return { error: profileError.message };
   }
 
   revalidatePath("/team");
+  return { success: `${name} ya puede entrar con su email y PIN` };
 }
