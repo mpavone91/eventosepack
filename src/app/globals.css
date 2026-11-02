@@ -22,11 +22,24 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* La app está diseñada solo en claro. "only light" pide al navegador (Chrome,
+   Samsung Internet) que no la oscurezca automáticamente en modo oscuro, que es
+   lo que dejaba las letras lavadas. */
+:root {
+  color-scheme: only light;
+}
+
+/* Campos de formulario con colores explícitos: no dependen del tema del sistema. */
+input,
+textarea,
+select {
+  background-color: #ffffff;
+  color: #171717;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+  opacity: 1;
 }
 
 body {
