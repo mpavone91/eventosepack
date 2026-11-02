@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { createLead } from "@/lib/actions";
 import LeadQualifier from "@/components/LeadQualifier";
+import NoteField from "@/components/NoteField";
 import type { Rating } from "@/lib/leadMeta";
 
 type FormState = {
@@ -115,7 +116,7 @@ export default function AddLeadDialog({
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4">
-          <div className="w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto">
+          <div className="w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl max-h-[92dvh] overflow-y-auto overscroll-contain">
             <div className="p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="font-semibold text-lg">Nuevo lead</h2>
@@ -205,19 +206,10 @@ export default function AddLeadDialog({
                   value={form.company}
                   onChange={(v) => setForm({ ...form, company: v })}
                 />
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
-                    Nota
-                  </label>
-                  <textarea
-                    value={form.note}
-                    onChange={(e) =>
-                      setForm({ ...form, note: e.target.value })
-                    }
-                    rows={2}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark"
-                  />
-                </div>
+                <NoteField
+                  value={form.note}
+                  onChange={(v) => setForm({ ...form, note: v })}
+                />
               </div>
 
               <LeadQualifier
@@ -229,19 +221,21 @@ export default function AddLeadDialog({
               />
 
               <p className="text-xs text-gray-400">
-                Confirmo que esta persona ha entregado sus datos
-                voluntariamente tras hablar en el stand.
+                Confirmo que esta persona ha entregado sus datos voluntariamente
+                tras hablar en el stand.
               </p>
 
               {saveError && <p className="text-sm text-red-600">{saveError}</p>}
 
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full rounded-xl bg-brand-lime text-brand-ink py-3 font-semibold hover:bg-brand-lime-hover transition disabled:opacity-50"
-              >
-                {saving ? "Guardando..." : "Guardar lead"}
-              </button>
+              <div className="sticky bottom-0 -mx-4 -mb-4 border-t border-gray-100 bg-white px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="w-full rounded-xl bg-brand-lime text-brand-ink py-3 font-semibold hover:bg-brand-lime-hover transition disabled:opacity-50"
+                >
+                  {saving ? "Guardando..." : "Guardar lead"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
