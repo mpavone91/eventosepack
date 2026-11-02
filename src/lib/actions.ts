@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { pinToPassword } from "@/lib/pin";
+import { cleanTags, isRating, type Rating } from "@/lib/leadMeta";
 
 export async function signOut() {
   const supabase = await createClient();
@@ -40,6 +41,8 @@ export type LeadInput = {
   phone?: string;
   company?: string;
   note?: string;
+  rating?: Rating | null;
+  tags?: string[];
   capture_method: "manual" | "card_scan";
 };
 
@@ -58,6 +61,8 @@ export async function createLead(eventId: string, input: LeadInput) {
     phone: input.phone || null,
     company: input.company || null,
     note: input.note || null,
+    rating: isRating(input.rating) ? input.rating : null,
+    tags: cleanTags(input.tags),
     capture_method: input.capture_method,
     consent: true,
     created_by: user.id,
@@ -76,6 +81,8 @@ export type LeadEditInput = {
   phone?: string;
   company?: string;
   note?: string;
+  rating?: Rating | null;
+  tags?: string[];
 };
 
 export async function updateLead(
@@ -93,6 +100,8 @@ export async function updateLead(
       phone: input.phone || null,
       company: input.company || null,
       note: input.note || null,
+      rating: isRating(input.rating) ? input.rating : null,
+      tags: cleanTags(input.tags),
     })
     .eq("id", leadId);
 
@@ -231,4 +240,38 @@ export async function createTeamMember(
 
   revalidatePath("/team");
   return { success: `${name} ya puede entrar con su email y PIN` };
+}
+
+export async function setEventMembers(eventId: string, userIds: string[]) {
+  await requireManager();
+  const supabase = await createClient();
+
+  const { data: current, error: readError } = await supabase
+    .from("epack_event_members")
+    .select("user_id")
+    .eq("event_id", eventId);
+  if (readError) return { error: readError.message };
+
+  const wanted = new Set(userIds);
+  const existing = new Set((current ?? []).map((m) => m.user_id as string));
+  const toAdd = [...wanted].filter((id) => !existing.has(id));
+  const toRemove = [...existing].filter((id) => !wanted.has(id));
+
+  if (toAdd.length) {
+    const { error } = await supabase
+      .from("epack_event_members")
+      .insert(toAdd.map((user_id) => ({ event_id: eventId, user_id })));
+    if (error) return { error: error.message };
+  }
+  if (toRemove.length) {
+    const { error } = await supabase
+      .from("epack_event_members")
+      .delete()
+      .eq("event_id", eventId)
+      .in("user_id", toRemove);
+    if (error) return { error: error.message };
+  }
+
+  revalidatePath(`/events/${eventId}`);
+  return { success: true };
 }

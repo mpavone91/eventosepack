@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import { createLead } from "@/lib/actions";
+import LeadQualifier from "@/components/LeadQualifier";
+import type { Rating } from "@/lib/leadMeta";
 
 type FormState = {
   first_name: string;
@@ -21,10 +23,18 @@ const EMPTY: FormState = {
   note: "",
 };
 
-export default function AddLeadDialog({ eventId }: { eventId: string }) {
+export default function AddLeadDialog({
+  eventId,
+  tagSuggestions = [],
+}: {
+  eventId: string;
+  tagSuggestions?: string[];
+}) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"manual" | "scan">("manual");
   const [form, setForm] = useState<FormState>(EMPTY);
+  const [rating, setRating] = useState<Rating | null>(null);
+  const [tags, setTags] = useState<string[]>([]);
   const [captureMethod, setCaptureMethod] = useState<"manual" | "card_scan">(
     "manual",
   );
@@ -36,6 +46,8 @@ export default function AddLeadDialog({ eventId }: { eventId: string }) {
 
   function reset() {
     setForm(EMPTY);
+    setRating(null);
+    setTags([]);
     setCaptureMethod("manual");
     setTab("manual");
     setScanError(null);
@@ -80,6 +92,8 @@ export default function AddLeadDialog({ eventId }: { eventId: string }) {
     setSaveError(null);
     const result = await createLead(eventId, {
       ...form,
+      rating,
+      tags,
       capture_method: captureMethod,
     });
     setSaving(false);
@@ -205,6 +219,14 @@ export default function AddLeadDialog({ eventId }: { eventId: string }) {
                   />
                 </div>
               </div>
+
+              <LeadQualifier
+                rating={rating}
+                tags={tags}
+                suggestions={tagSuggestions}
+                onRatingChange={setRating}
+                onTagsChange={setTags}
+              />
 
               <p className="text-xs text-gray-400">
                 Confirmo que esta persona ha entregado sus datos

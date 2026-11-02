@@ -10,11 +10,11 @@ export default async function CapturePage({
   const { slug } = await params;
   const supabase = await createClient();
 
+  // Función pública (security definer): el formulario QR funciona sin sesión y
+  // sin exponer la lista de eventos.
   const { data: event } = await supabase
-    .from("epack_events")
-    .select("id, name")
-    .eq("slug", slug)
-    .single();
+    .rpc("epack_event_by_slug", { p_slug: slug })
+    .maybeSingle<{ id: string; name: string }>();
 
   if (!event) notFound();
 

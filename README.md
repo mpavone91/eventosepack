@@ -11,8 +11,15 @@ desde el navegador, desplegada en Vercel.
 - Roles: un `manager` ve todos los eventos y leads del equipo; un `rep`
   (comercial) ve y gestiona todo lo compartido pero solo puede editar/borrar
   lo que él mismo creó.
-- Eventos como "carpetas" compartidas por todo el equipo: cada feria es un
-  evento con su contador de leads, visible para todos los que tengan cuenta.
+- Eventos como "carpetas": el manager ve todos y, dentro de cada evento, marca
+  qué comerciales participan. Cada comercial solo ve los eventos a los que está
+  asignada (o que ha creado ella) y sus leads.
+- Calificación de cada lead: valoración Caliente / Templado / Frío y etiquetas
+  (Decision maker, Muy interesado… o nuevas que crea el equipo).
+- Informe por evento (valoración, leads por comercial, etiquetas más usadas) y
+  exportación a Excel (.xlsx) o a CSV con columnas de Lead de Salesforce
+  (First Name, Last Name, Company, Email, Phone, Rating, Lead Source…), listo
+  para el Data Import Wizard.
 - Alta manual de lead: nombre, apellidos, email, teléfono, empresa, nota.
 - Escaneo de tarjeta: cámara o galería → extracción con IA (Claude, visión) →
   formulario pre-rellenado y editable antes de guardar.

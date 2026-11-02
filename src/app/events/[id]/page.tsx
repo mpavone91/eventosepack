@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import AddLeadDialog from "@/components/AddLeadDialog";
 import EventQr from "@/components/EventQr";
 import LeadList from "@/components/LeadList";
+import EventReport from "@/components/EventReport";
+import EventMembers from "@/components/EventMembers";
 
 export default async function EventPage({
   params,
@@ -22,16 +24,30 @@ export default async function EventPage({
 
   if (!event) notFound();
 
-  const [{ data: leads }, { data: profiles }] = await Promise.all([
-    supabase
-      .from("epack_leads")
-      .select(
-        "id, first_name, last_name, email, phone, company, note, capture_method, created_at, created_by",
-      )
-      .eq("event_id", id)
-      .order("created_at", { ascending: false }),
-    supabase.from("epack_profiles").select("user_id, name"),
-  ]);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [{ data: leads }, { data: profiles }, { data: members }] =
+    await Promise.all([
+      supabase
+        .from("epack_leads")
+        .select(
+          "id, first_name, last_name, email, phone, company, note, capture_method, rating, tags, created_at, created_by",
+        )
+        .eq("event_id", id)
+        .order("created_at", { ascending: false }),
+      supabase.from("epack_profiles").select("user_id, name, email, role"),
+      supabase.from("epack_event_members").select("user_id").eq("event_id", id),
+    ]);
+
+  const isManager = (profiles ?? []).some(
+    (p) => p.user_id === user?.id && p.role === "manager",
+  );
+  const reps = (profiles ?? []).filter((p) => p.role === "rep");
+  const tagSuggestions = [
+    ...new Set((leads ?? []).flatMap((l) => (l.tags as string[] | null) ?? [])),
+  ];
 
   const nameByUserId = new Map(
     (profiles ?? []).map((p) => [p.user_id, p.name]),
@@ -64,13 +80,27 @@ export default async function EventPage({
       </header>
 
       <div className="grid grid-cols-1 gap-3">
-        <AddLeadDialog eventId={event.id} />
+        <AddLeadDialog eventId={event.id} tagSuggestions={tagSuggestions} />
         <EventQr url={captureUrl} />
       </div>
 
+      <EventReport eventId={event.id} leads={leadsWithCapturer} />
+
+      {isManager && (
+        <EventMembers
+          eventId={event.id}
+          reps={reps}
+          assigned={(members ?? []).map((m) => m.user_id as string)}
+        />
+      )}
+
       <section>
         <h2 className="text-sm font-medium text-gray-500 mb-2">Leads</h2>
-        <LeadList eventId={event.id} leads={leadsWithCapturer} />
+        <LeadList
+          eventId={event.id}
+          leads={leadsWithCapturer}
+          tagSuggestions={tagSuggestions}
+        />
       </section>
     </main>
   );

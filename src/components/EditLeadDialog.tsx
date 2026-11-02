@@ -3,14 +3,18 @@
 import { useState } from "react";
 import { updateLead } from "@/lib/actions";
 import type { Lead } from "@/components/LeadList";
+import LeadQualifier from "@/components/LeadQualifier";
+import { isRating, type Rating } from "@/lib/leadMeta";
 
 export default function EditLeadDialog({
   eventId,
   lead,
+  tagSuggestions,
   onClose,
 }: {
   eventId: string;
   lead: Lead | null;
+  tagSuggestions?: string[];
   onClose: () => void;
 }) {
   if (!lead) return null;
@@ -20,6 +24,7 @@ export default function EditLeadDialog({
       key={lead.id}
       eventId={eventId}
       lead={lead}
+      tagSuggestions={tagSuggestions}
       onClose={onClose}
     />
   );
@@ -28,10 +33,12 @@ export default function EditLeadDialog({
 function EditLeadForm({
   eventId,
   lead,
+  tagSuggestions = [],
   onClose,
 }: {
   eventId: string;
   lead: Lead;
+  tagSuggestions?: string[];
   onClose: () => void;
 }) {
   const [form, setForm] = useState({
@@ -42,13 +49,21 @@ function EditLeadForm({
     company: lead.company ?? "",
     note: lead.note ?? "",
   });
+  const [rating, setRating] = useState<Rating | null>(
+    isRating(lead.rating) ? lead.rating : null,
+  );
+  const [tags, setTags] = useState<string[]>(lead.tags ?? []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSave() {
     setSaving(true);
     setError(null);
-    const result = await updateLead(eventId, lead.id, form);
+    const result = await updateLead(eventId, lead.id, {
+      ...form,
+      rating,
+      tags,
+    });
     setSaving(false);
     if (result?.error) {
       setError(result.error);
@@ -114,6 +129,14 @@ function EditLeadForm({
               />
             </div>
           </div>
+
+          <LeadQualifier
+            rating={rating}
+            tags={tags}
+            suggestions={tagSuggestions}
+            onRatingChange={setRating}
+            onTagsChange={setTags}
+          />
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 

@@ -1,3 +1,4 @@
+-- Ejecutar entero, una sola vez, en Supabase → SQL Editor (proyecto QuantiChef).
 -- Comerciales asignadas por evento: cada comercial ve solo sus eventos y leads.
 create table public.epack_event_members (
   event_id uuid not null references public.epack_events(id) on delete cascade,
@@ -48,3 +49,8 @@ insert into public.epack_event_members (event_id, user_id)
 select e.id, p.user_id from public.epack_events e cross join public.epack_profiles p
 where p.role = 'rep'
 on conflict do nothing;
+
+-- Calificación de leads: valoración (caliente/templado/frío) y etiquetas libres.
+alter table public.epack_leads
+  add column rating text check (rating in ('hot', 'warm', 'cold')),
+  add column tags text[] not null default '{}';
