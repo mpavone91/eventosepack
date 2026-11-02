@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { createLead } from "@/lib/actions";
 import LeadQualifier from "@/components/LeadQualifier";
 import NoteField from "@/components/NoteField";
+import { shrinkImage } from "@/lib/shrinkImage";
 import type { Rating } from "@/lib/leadMeta";
 
 type FormState = {
@@ -63,27 +64,39 @@ export default function AddLeadDialog({
   async function handleFile(file: File) {
     setScanning(true);
     setScanError(null);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30_000);
     try {
+      const image = await shrinkImage(file);
       const body = new FormData();
-      body.append("image", file);
-      const res = await fetch("/api/ocr", { method: "POST", body });
+      body.append("image", image, "tarjeta.jpg");
+      const res = await fetch("/api/ocr", {
+        method: "POST",
+        body,
+        signal: controller.signal,
+      });
       const data = await res.json();
       if (!res.ok) {
         setScanError(data.error ?? "No se pudo leer la tarjeta");
         return;
       }
-      setForm({
+      setForm((prev) => ({
         first_name: data.first_name ?? "",
         last_name: data.last_name ?? "",
         email: data.email ?? "",
         phone: data.phone ?? "",
         company: data.company ?? "",
-        note: "",
-      });
+        note: prev.note,
+      }));
       setCaptureMethod("card_scan");
-    } catch {
-      setScanError("Error de red al leer la tarjeta");
+    } catch (error) {
+      setScanError(
+        error instanceof DOMException && error.name === "AbortError"
+          ? "Está tardando demasiado (mala cobertura). Rellénalo a mano o prueba otra vez."
+          : "Error de red al leer la tarjeta",
+      );
     } finally {
+      clearTimeout(timer);
       setScanning(false);
     }
   }

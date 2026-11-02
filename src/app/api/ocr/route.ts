@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
 
-const MODEL = "claude-haiku-4-5-20251001";
+// Haiku 5.5: el modelo más rápido. Sin thinking y effort bajo para mínima latencia:
+// leer una tarjeta no necesita razonar.
+const MODEL = "claude-haiku-5-5";
 
 const EXTRACTION_PROMPT = `Esta imagen es una tarjeta de visita (business card). Extrae los datos de la persona y responde ÚNICAMENTE con un objeto JSON, sin texto adicional ni bloques de código, con esta forma exacta:
 
@@ -36,43 +39,49 @@ export async function POST(request: NextRequest) {
 
   const bytes = await file.arrayBuffer();
   const base64 = Buffer.from(bytes).toString("base64");
-  const mediaType = file.type && file.type.startsWith("image/") ? file.type : "image/jpeg";
+  const supported = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  const mediaType = supported.includes(file.type) ? file.type : "image/jpeg";
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
+  const client = new Anthropic({ apiKey, maxRetries: 1, timeout: 25_000 });
+
+  let text = "";
+  try {
+    const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 300,
+      max_tokens: 1024,
+      thinking: { type: "disabled" },
+      output_config: { effort: "low" },
       messages: [
         {
           role: "user",
           content: [
             {
               type: "image",
-              source: { type: "base64", media_type: mediaType, data: base64 },
+              source: {
+                type: "base64",
+                media_type: mediaType as "image/jpeg" | "image/png" | "image/webp" | "image/gif",
+                data: base64,
+              },
             },
             { type: "text", text: EXTRACTION_PROMPT },
           ],
         },
       ],
-    }),
-  });
-
-  if (!response.ok) {
-    const detail = await response.text().catch(() => "");
+    });
+    for (const block of response.content) {
+      if (block.type === "text") text += block.text;
+    }
+  } catch (error) {
+    const detail =
+      error instanceof Anthropic.APIError
+        ? `${error.status ?? ""} ${error.message}`
+        : String(error);
+    console.error("OCR error:", detail);
     return NextResponse.json(
-      { error: `Error del servicio de IA (${response.status}): ${detail.slice(0, 200)}` },
+      { error: "El servicio de IA no respondió. Prueba otra vez o rellénalo a mano." },
       { status: 502 },
     );
   }
-
-  const data = await response.json();
-  const text: string = data.content?.[0]?.text ?? "";
 
   let parsed: Record<string, string>;
   try {
