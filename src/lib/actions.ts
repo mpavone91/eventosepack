@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { pinToPassword } from "@/lib/pin";
 import { cleanTags, isRating, type Rating } from "@/lib/leadMeta";
+import { findDuplicateLeads, type DuplicateMatch } from "@/lib/duplicates";
 
 export async function signOut() {
   const supabase = await createClient();
@@ -44,14 +45,32 @@ export type LeadInput = {
   rating?: Rating | null;
   tags?: string[];
   capture_method: "manual" | "card_scan";
+  // true cuando la comercial ya vio el aviso de duplicado y decide guardar igualmente.
+  force?: boolean;
 };
 
-export async function createLead(eventId: string, input: LeadInput) {
+export async function createLead(
+  eventId: string,
+  input: LeadInput,
+): Promise<{ error?: string; success?: boolean; duplicates?: DuplicateMatch[] }> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  if (!input.force) {
+    // Solo si tiene acceso al evento (RLS); si no, el insert fallará igualmente.
+    const { data: event } = await supabase
+      .from("epack_events")
+      .select("id")
+      .eq("id", eventId)
+      .maybeSingle();
+    if (event) {
+      const duplicates = await findDuplicateLeads({ eventId, ...input });
+      if (duplicates.length) return { duplicates };
+    }
+  }
 
   const { error } = await supabase.from("epack_leads").insert({
     event_id: eventId,

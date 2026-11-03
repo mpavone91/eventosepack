@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createLead } from "@/lib/actions";
+import type { DuplicateMatch } from "@/lib/duplicates";
 import LeadQualifier from "@/components/LeadQualifier";
 import NoteField from "@/components/NoteField";
 import { shrinkImage } from "@/lib/shrinkImage";
@@ -44,6 +45,7 @@ export default function AddLeadDialog({
   const [scanError, setScanError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [duplicates, setDuplicates] = useState<DuplicateMatch[] | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function reset() {
@@ -54,6 +56,7 @@ export default function AddLeadDialog({
     setTab("manual");
     setScanError(null);
     setSaveError(null);
+    setDuplicates(null);
   }
 
   function closeDialog() {
@@ -101,7 +104,7 @@ export default function AddLeadDialog({
     }
   }
 
-  async function handleSave() {
+  async function handleSave(force = false) {
     setSaving(true);
     setSaveError(null);
     const result = await createLead(eventId, {
@@ -109,10 +112,15 @@ export default function AddLeadDialog({
       rating,
       tags,
       capture_method: captureMethod,
+      force,
     });
     setSaving(false);
     if (result?.error) {
       setSaveError(result.error);
+      return;
+    }
+    if (result?.duplicates?.length) {
+      setDuplicates(result.duplicates);
       return;
     }
     closeDialog();
@@ -241,13 +249,58 @@ export default function AddLeadDialog({
               {saveError && <p className="text-sm text-red-600">{saveError}</p>}
 
               <div className="sticky bottom-0 -mx-4 -mb-4 border-t border-gray-100 bg-white px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="w-full rounded-xl bg-brand-lime text-brand-ink py-3 font-semibold hover:bg-brand-lime-hover transition disabled:opacity-50"
-                >
-                  {saving ? "Guardando..." : "Guardar lead"}
-                </button>
+                {duplicates ? (
+                  <div className="space-y-3">
+                    <div className="rounded-xl border border-amber-300 bg-amber-50 p-3">
+                      <p className="text-sm font-semibold text-amber-900">
+                        ⚠️ Este lead parece que ya existe
+                      </p>
+                      <ul className="mt-2 space-y-2">
+                        {duplicates.map((d, i) => (
+                          <li key={i} className="text-sm text-amber-900">
+                            <span className="font-medium">{d.name}</span>
+                            {d.company ? ` · ${d.company}` : ""}
+                            <span className="block text-xs text-amber-800">
+                              Mismo {d.reason} ·{" "}
+                              {d.same_event
+                                ? "en este evento"
+                                : `en ${d.event_name ?? "otro evento"}`}
+                              {d.captured_by ? ` · captado por ${d.captured_by}` : ""} ·{" "}
+                              {new Date(d.created_at).toLocaleDateString("es-ES", {
+                                day: "numeric",
+                                month: "short",
+                              })}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => setDuplicates(null)}
+                        disabled={saving}
+                        className="rounded-xl border border-gray-300 py-3 text-sm font-semibold text-gray-700 disabled:opacity-50"
+                      >
+                        Revisar
+                      </button>
+                      <button
+                        onClick={() => handleSave(true)}
+                        disabled={saving}
+                        className="rounded-xl bg-brand-dark py-3 text-sm font-semibold text-white disabled:opacity-50"
+                      >
+                        {saving ? "Guardando..." : "Guardar igualmente"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleSave()}
+                    disabled={saving}
+                    className="w-full rounded-xl bg-brand-lime text-brand-ink py-3 font-semibold hover:bg-brand-lime-hover transition disabled:opacity-50"
+                  >
+                    {saving ? "Comprobando..." : "Guardar lead"}
+                  </button>
+                )}
               </div>
             </div>
           </div>
