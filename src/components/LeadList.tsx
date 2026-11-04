@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { deleteLead } from "@/lib/actions";
 import SwipeableRow from "@/components/SwipeableRow";
 import EditLeadDialog from "@/components/EditLeadDialog";
@@ -21,6 +21,29 @@ export type Lead = {
   captured_by_name?: string | null;
 };
 
+// Minúsculas y sin tildes: "jose" encuentra "José".
+function norm(s: string) {
+  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function searchText(lead: Lead) {
+  return norm(
+    [
+      lead.first_name,
+      lead.last_name,
+      lead.email,
+      lead.company,
+      lead.phone,
+      lead.phone?.replace(/\D/g, ""),
+      lead.note,
+      ...(lead.tags ?? []),
+      lead.captured_by_name,
+    ]
+      .filter(Boolean)
+      .join(" "),
+  );
+}
+
 const METHOD_LABEL: Record<string, string> = {
   manual: "Manual",
   card_scan: "Tarjeta",
@@ -38,6 +61,18 @@ export default function LeadList({
 }) {
   const [, startTransition] = useTransition();
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
+  const [query, setQuery] = useState("");
+
+  const indexed = useMemo(
+    () => leads.map((lead) => ({ lead, text: searchText(lead) })),
+    [leads],
+  );
+  const words = norm(query).split(/\s+/).filter(Boolean);
+  const visible = words.length
+    ? indexed
+        .filter(({ text }) => words.every((w) => text.includes(w)))
+        .map(({ lead }) => lead)
+    : leads;
 
   if (!leads.length) {
     return (
@@ -49,11 +84,47 @@ export default function LeadList({
 
   return (
     <>
+      <div className="sticky top-0 z-10 -mx-4 bg-white/95 px-4 pb-2 pt-1 backdrop-blur">
+        <div className="relative">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            🔍
+          </span>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={`Buscar en ${leads.length} leads: nombre, email, empresa…`}
+            enterKeyHint="search"
+            autoComplete="off"
+            className="w-full rounded-xl border border-gray-300 py-2.5 pl-9 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label="Borrar búsqueda"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full px-2 text-lg leading-none text-gray-400"
+            >
+              ×
+            </button>
+          )}
+        </div>
+        {words.length > 0 && (
+          <p className="mt-1 text-xs text-gray-500">
+            {visible.length === 1 ? "1 resultado" : `${visible.length} resultados`}
+          </p>
+        )}
+      </div>
       <p className="text-xs text-gray-400 mb-2 sm:hidden">
         Toca un lead para editarlo, o desliza a la izquierda para eliminarlo.
       </p>
+      {words.length > 0 && visible.length === 0 && (
+        <p className="text-sm text-gray-500 text-center py-6">
+          Ningún lead coincide con «{query.trim()}».
+        </p>
+      )}
       <ul className="space-y-2">
-        {leads.map((lead) => {
+        {visible.map((lead) => {
           const name = [lead.first_name, lead.last_name]
             .filter(Boolean)
             .join(" ");
